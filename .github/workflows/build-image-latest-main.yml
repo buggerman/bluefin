@@ -1,6 +1,14 @@
 name: Latest Images
 on:
   merge_group:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/workflows/*validate*.yml"
+      - "**.md"
+      - "flatpaks/**"
+      - "system_files/shared/etc/bazaar/**"
   pull_request:
     branches:
       - main
