@@ -18,6 +18,8 @@ on:
       - "**.md"
       - "flatpaks/**"
       - "system_files/shared/etc/bazaar/**"
+  schedule:
+    - cron: "0 5 * * *" # Daily at 5:00 AM UTC
   workflow_call:
   workflow_dispatch:
 
