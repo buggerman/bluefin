@@ -196,9 +196,15 @@ jobs:
 
             echo "digest=${digest}" >> $GITHUB_OUTPUT
 
+      - name: Prepare TUF root directory
+        if: github.event_name != 'pull_request'
+        run: install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /tmp/sigstore-tuf
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
         if: github.event_name != 'pull_request'
+        env:
+          TUF_ROOT: /tmp/sigstore-tuf
 
       - name: Sign container image
         if: github.event_name != 'pull_request'
@@ -208,6 +214,7 @@ jobs:
           TAGS: ${{ steps.push.outputs.outputs && fromJSON(steps.push.outputs.outputs).digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          TUF_ROOT: /tmp/sigstore-tuf
 
       - name: Sign container image
         if: github.event_name != 'pull_request' && contains(matrix.image_flavor, 'hwe')
@@ -218,6 +225,7 @@ jobs:
           TAGS: ${{ steps.push.outputs.outputs && fromJSON(steps.push.outputs.outputs).digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          TUF_ROOT: /tmp/sigstore-tuf
 
       - name: Install ORAS
         if: github.event_name != 'pull_request'
@@ -255,6 +263,7 @@ jobs:
           LOWERCASE: ${{ steps.registry_case.outputs.lowercase }}
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           SBOM_DIGEST: ${{ steps.upload-sbom.outputs.sbom_digest }}
+          TUF_ROOT: /tmp/sigstore-tuf
         run: |
           cosign sign -y --key env://COSIGN_PRIVATE_KEY ${LOWERCASE}/${IMAGE_NAME}@${SBOM_DIGEST}
 
